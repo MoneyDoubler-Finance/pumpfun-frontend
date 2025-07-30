@@ -8,11 +8,16 @@ pub mod utils;
 
 use crate::instructions::*;
 
-declare_id!("6DnFKqP2y4oAAnPvNNPAgGLKZ9LUo181wzpCw1ytjoRr");
+declare_id!("C1NYLjRoFHPvBASeiWsFqFmWFcoFwzPYGKHCAiU86HAd");
 
 #[program]
 pub mod pump {
     use super::*;
+
+    //  called by admin to create global state
+    pub fn create_global(ctx: Context<CreateGlobal>, platform_fee_bps: u16) -> Result<()> {
+        create_global::handler(ctx, platform_fee_bps)
+    }
 
     //  called by admin to set global config
     //  need to check the signer is authority
@@ -49,5 +54,10 @@ pub mod pump {
         nonce: u8,
     ) -> Result<()> {
         ctx.accounts.process(nonce)
+    }
+
+    //  buy back and burn tokens using fee treasury funds
+    pub fn buy_back_and_burn(ctx: Context<BuyBackAndBurn>, lamports: u64) -> Result<()> {
+        buy_back_and_burn::handler(ctx, lamports)
     }
 }

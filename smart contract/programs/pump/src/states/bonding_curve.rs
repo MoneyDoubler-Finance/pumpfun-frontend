@@ -50,7 +50,8 @@ impl<'info> BondingCurve {
         user: &Signer<'info>,              //  user address
 
         curve_pda: &mut AccountInfo<'info>,     //  bonding curve PDA
-        fee_recipient: &mut AccountInfo<'info>, //  team wallet address to get fee
+        fee_treasury: &mut AccountInfo<'info>,  //  fee treasury PDA
+        _fee_recipient: &mut AccountInfo<'info>, //  team wallet address to get fee
 
         user_ata: &mut AccountInfo<'info>, //  associated toke accounts for user
         curve_ata: &mut AccountInfo<'info>, //  associated toke accounts for curve
@@ -74,8 +75,8 @@ impl<'info> BondingCurve {
             PumpError::ReturnAmountTooSmall
         );
 
-        //  transfer fee to team wallet
-        sol_transfer_from_user(&user, fee_recipient, system_program, fee_lamports)?;
+        //  transfer fee to fee treasury instead of fee recipient
+        sol_transfer_from_user(&user, fee_treasury, system_program, fee_lamports)?;
         //  transfer adjusted amount to curve
         sol_transfer_from_user(&user, curve_pda, system_program, amount_in - fee_lamports)?;
         //  transfer token from PDA to user
@@ -121,7 +122,8 @@ impl<'info> BondingCurve {
         user: &Signer<'info>,              //  user address
 
         curve_pda: &mut AccountInfo<'info>, //  bonding curve PDA
-        fee_recipient: &mut AccountInfo<'info>, //  team wallet address to get fee
+        fee_treasury: &mut AccountInfo<'info>, //  fee treasury PDA
+        _fee_recipient: &mut AccountInfo<'info>, //  team wallet address to get fee
 
         user_ata: &mut AccountInfo<'info>, //  associated toke accounts for user
         curve_ata: &mut AccountInfo<'info>, //  associated toke accounts for curve
@@ -146,10 +148,10 @@ impl<'info> BondingCurve {
 
         let token = token_mint.key();
         let signer_seeds: &[&[&[u8]]] = &[&BondingCurve::get_signer(&token, &curve_bump)];
-        //  transfer fee to team wallet
+        //  transfer fee to fee treasury instead of fee recipient
         sol_transfer_with_signer(
             &user,
-            fee_recipient,
+            fee_treasury,
             system_program,
             signer_seeds,
             fee_lamports,

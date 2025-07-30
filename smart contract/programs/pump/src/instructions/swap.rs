@@ -1,5 +1,5 @@
 use crate::{
-    errors::PumpError, states::{BondingCurve, Config}
+    errors::PumpError, states::{BondingCurve, Config, Global}
 };
 use anchor_lang::{prelude::*, system_program};
 use anchor_spl::{
@@ -16,6 +16,18 @@ pub struct Swap<'info> {
         bump,
     )]
     global_config: Box<Account<'info, Config>>,
+    #[account(
+        seeds = [Global::SEED_PREFIX.as_bytes()],
+        bump,
+    )]
+    global: Box<Account<'info, Global>>,
+    /// CHECK: fee treasury PDA that accumulates fees
+    #[account(
+        mut,
+        seeds = [b"fee_treasury"],
+        bump,
+    )]
+    fee_treasury: AccountInfo<'info>,
     /// CHECK: should be same with the address in the global_config
     #[account(
         mut,
@@ -80,6 +92,7 @@ impl<'info> Swap<'info> {
                 global_config.curve_limit,
                 &self.user,
                 curve_pda,
+                &mut self.fee_treasury,
                 &mut self.fee_recipient,
                 &mut self.user_token_account.to_account_info(),
                 &mut self.curve_token_account.to_account_info(),
@@ -96,6 +109,7 @@ impl<'info> Swap<'info> {
                 &self.token_mint,
                 &self.user,
                 curve_pda,
+                &mut self.fee_treasury,
                 &mut self.fee_recipient,
                 &mut self.user_token_account.to_account_info(),
                 &mut self.curve_token_account.to_account_info(),

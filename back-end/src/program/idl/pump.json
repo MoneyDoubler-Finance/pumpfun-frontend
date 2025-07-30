@@ -1,0 +1,109 @@
+{
+  "version": "0.1.0",
+  "name": "pump",
+  "instructions": [
+    {
+      "name": "createGlobal",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "global",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "platformFeeBps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "buyBackAndBurn",
+      "accounts": [
+        {
+          "name": "feeTreasury",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "lamports",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Global",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "feeTreasury",
+            "type": "publicKey"
+          },
+          {
+            "name": "totalFeesCollected",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "BuyBack",
+      "fields": [
+        {
+          "name": "lamportsUsed",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "address": "C1NYLjRoFHPvBASeiWsFqFmWFcoFwzPYGKHCAiU86HAd"
+  }
+} 

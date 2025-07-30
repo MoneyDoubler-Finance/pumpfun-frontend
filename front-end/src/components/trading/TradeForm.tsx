@@ -15,6 +15,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const [isBuy, setIsBuy] = useState<number>(0);
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [tokenName, setTokenName] = useState<string>("Token")
+  const [burned, setBurned] = useState(0);
   const { user } = useContext(UserContext);
   const wallet = useWallet();
   const SolList = [
@@ -50,6 +51,16 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     const userWallet = new PublicKey(user.wallet)
     const res = await swapTx(mint, wallet, sol, isBuy)
   }
+
+  // WebSocket listener for burn events
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:4000/ws');
+    ws.onmessage = (msg) => {
+      const e = JSON.parse(msg.data);
+      if (e.type === 'BuyBack') setBurned((b) => b + e.lamports_used / 1e9);
+    };
+    return () => ws.close();
+  }, []);
 
   useEffect(() => {
     if (coin.name !== "" && coin.name !== undefined && coin.name !== null)
@@ -116,6 +127,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               Place Trade
             </div>
           )}
+        
+        {/* Burn stats display */}
+        <div className="text-sm mt-2 text-center">🔥 Burned so far: {burned.toFixed(3)} SOL</div>
       </div>
     </div >
   );

@@ -7,7 +7,7 @@ skip-lint = false
 skip-idl = true
 
 [programs.devnet]
-pump = "6DnFKqP2y4oAAnPvNNPAgGLKZ9LUo181wzpCw1ytjoRr"
+pump = "C1NYLjRoFHPvBASeiWsFqFmWFcoFwzPYGKHCAiU86HAd"
 
 [registry]
 url = "https://api.apr.dev"
