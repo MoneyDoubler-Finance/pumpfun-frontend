@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev": "run-p -l --continue-on-error back-end:start front-end:dev"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.30.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

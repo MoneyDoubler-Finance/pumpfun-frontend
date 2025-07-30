@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-async-client-component */
 "use client";
 import React, { ReactNode, useState } from "react";
 import { PageProvider } from "@/contexts/PageContext";

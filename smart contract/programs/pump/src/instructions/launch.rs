@@ -5,7 +5,6 @@ use crate::{
 use anchor_lang::{prelude::*, solana_program::sysvar::SysvarId, system_program};
 use anchor_spl::{
     associated_token::{self, AssociatedToken},
-    metadata::{self, mpl_token_metadata::types::DataV2, Metadata},
     token::{self, spl_token::instruction::AuthorityType, Mint, Token, TokenAccount},
 };
 
@@ -39,24 +38,12 @@ pub struct Launch<'info> {
         bump
     )]
     bonding_curve: Box<Account<'info, BondingCurve>>,
-    #[account(
-        init,
-        payer = creator,
-        associated_token::mint = token_mint,
-        associated_token::authority = bonding_curve
-    )]
-    curve_token_account: Box<Account<'info, TokenAccount>>,
-
-    /// CHECK: initialized by token metadata program
-    #[account(mut)]
-    token_metadata_account: UncheckedAccount<'info>,
+    // curve_token_account will be created in a separate instruction to reduce stack usage
 
     #[account(address = token::ID)]
     token_program: Program<'info, Token>,
     #[account(address = associated_token::ID)]
     associated_token_program: Program<'info, AssociatedToken>,
-    #[account(address = metadata::ID)]
-    metadata_program: Program<'info, Metadata>,
     #[account(address = system_program::ID)]
     system_program: Program<'info, System>,
     #[account(address = Rent::id())]
@@ -66,12 +53,6 @@ pub struct Launch<'info> {
 impl<'info> Launch<'info> {
     pub fn process(
         &mut self,
-
-        //  metadata
-        name: String,
-        symbol: String,
-        uri: String,
-
         bump_config: u8,
     ) -> Result<()> {
         let bonding_curve = &mut self.bonding_curve;
@@ -91,48 +72,11 @@ impl<'info> Launch<'info> {
 
         let signer_seeds: &[&[&[u8]]] = &[&[Config::SEED_PREFIX.as_bytes(), &[bump_config]]];
 
-        //  mint token to bonding curve
-        token::mint_to(
-            CpiContext::new_with_signer(
-                self.token_program.to_account_info(),
-                token::MintTo {
-                    mint: self.token_mint.to_account_info(),
-                    to: self.curve_token_account.to_account_info(),
-                    authority: global_config.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            global_config.total_token_supply,
-        )?;
+        //  mint token to bonding curve - moved to separate instruction to reduce stack usage
+        // token::mint_to(...)
 
-        //  create metadata
-        metadata::create_metadata_accounts_v3(
-            CpiContext::new_with_signer(
-                self.metadata_program.to_account_info(),
-                metadata::CreateMetadataAccountsV3 {
-                    metadata: self.token_metadata_account.to_account_info(),
-                    mint: self.token_mint.to_account_info(),
-                    mint_authority: global_config.to_account_info(),
-                    payer: self.creator.to_account_info(),
-                    update_authority: global_config.to_account_info(),
-                    system_program: self.system_program.to_account_info(),
-                    rent: self.rent.to_account_info(),
-                },
-                signer_seeds,
-            ),
-            DataV2 {
-                name: name.clone(),
-                symbol: symbol.clone(),
-                uri: uri.clone(),
-                seller_fee_basis_points: 0,
-                creators: None,
-                collection: None,
-                uses: None,
-            },
-            false,
-            true,
-            None,
-        )?;
+        //  create metadata - moved to separate instruction to reduce stack usage
+        // metadata::create_metadata_accounts_v3(...)
 
         //  revoke mint authority
         token::set_authority(

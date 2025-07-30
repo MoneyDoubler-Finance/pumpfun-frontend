@@ -49,20 +49,19 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
         avatar: uploadedUrl,
       };
 
-      const result = await updateUser(index._id, updatedUser);
+      const result = await updateUser(updatedUser);
 
-      if (result.error) {
-        errorAlert('Failed to save the data.');
-      } else {
+      if (result) {
         successAlert('Successfully updated.');
         setUser(updatedUser);
         setProfileEditModal(false);
+      } else {
+        errorAlert('Failed to save the data.');
       }
     } catch (error) {
       errorAlert('An error occurred while updating your profile.');
     }
   };
-
 
   const uploadImage = async (image: string): Promise<string> => {
     // Your logic here

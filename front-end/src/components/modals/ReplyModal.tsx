@@ -28,18 +28,16 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
         console.log("url: ", url)
 
         reply = {
-          coinId: data._id,
-          sender: user._id,
-          msg: msg,
-          img: url
+          user: user,
+          message: msg,
+          image: url
         }
       }
     } else {
       if (user._id) {
         reply = {
-          coinId: data._id,
-          sender: user._id,
-          msg: msg,
+          user: user,
+          message: msg,
         }
       }
     }
@@ -69,7 +67,6 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
     const uploadSuccess = true; // Example logic
     return uploadSuccess ? 'uploaded-image-url' : '';
   };
-
 
   return (
     <div className='fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md'>

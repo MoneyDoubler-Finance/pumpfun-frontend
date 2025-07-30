@@ -2,10 +2,8 @@
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { successAlert, errorAlert, infoAlert } from "@/components/others/ToastGroup";
-import base58 from "bs58";
+import { successAlert, errorAlert } from "@/components/others/ToastGroup";
 import UserContext from "@/context/UserContext";
-import { confirmWallet, walletConnect } from "@/utils/util";
 import { userInfo } from "@/utils/types";
 import { useRouter } from "next/navigation";
 import { RiExchangeDollarLine } from "react-icons/ri";
@@ -15,59 +13,26 @@ import { TbMoodEdit } from "react-icons/tb";
 export const ConnectButton: FC = () => {
   const { user, setUser, login, setLogin, isLoading, setIsLoading } =
     useContext(UserContext);
-  const { publicKey, disconnect, connect, signMessage } = useWallet();
-  const { visible, setVisible } = useWalletModal();
+  const { publicKey, disconnect, connected } = useWallet();
+  const { setVisible } = useWalletModal();
   const router = useRouter()
 
   const tempUser = useMemo(() => user, [user]);
+  
+  // Handle wallet connection
   useEffect(() => {
-    const handleClick = async () => {
-      if (publicKey && !login) {
-        const updatedUser: userInfo = {
-          name: publicKey.toBase58().slice(0, 6),
-          wallet: publicKey.toBase58(),
-          isLedger: false,
-        };
-        await sign(updatedUser);
-      }
-    };
-    handleClick();
-  }, [publicKey, login]); // Removed `connect`, `wallet`, and `disconnect` to prevent unnecessary calls
-  const sign = async (updatedUser: userInfo) => {
-    try {
-      const connection = await walletConnect({ data: updatedUser });
-      if (!connection) return;
-      if (connection.nonce === undefined) {
-        const newUser = {
-          name: connection.name,
-          wallet: connection.wallet,
-          _id: connection._id,
-          avatar: connection.avatar,
-        };
-        setUser(newUser as userInfo);
-        setLogin(true);
-        return;
-      }
-
-      const msg = new TextEncoder().encode(
-        `Nonce to confirm: ${connection.nonce}`
-      );
-
-      const sig = await signMessage?.(msg);
-      const res = base58.encode(sig as Uint8Array);
-      const signedWallet = { ...connection, signature: res };
-      const confirm = await confirmWallet({ data: signedWallet });
-
-      if (confirm) {
-        setUser(confirm);
-        setLogin(true);
-        setIsLoading(false);
-      }
-      successAlert("Message signed.");
-    } catch (error) {
-      errorAlert("Sign-in failed.");
+    if (connected && publicKey && !login) {
+      const updatedUser: userInfo = {
+        name: publicKey.toBase58().slice(0, 6),
+        wallet: publicKey.toBase58(),
+        _id: publicKey.toBase58(), // Use wallet address as ID for now
+        avatar: undefined,
+      };
+      setUser(updatedUser);
+      setLogin(true);
+      successAlert("Wallet connected successfully!");
     }
-  };
+  }, [connected, publicKey, login, setUser, setLogin]);
 
   const logOut = async () => {
     if (typeof disconnect === "function") {
@@ -77,10 +42,13 @@ export const ConnectButton: FC = () => {
     setUser({} as userInfo);
     setLogin(false);
     localStorage.clear();
+    successAlert("Wallet disconnected!");
   };
+  
   const handleToProfile = (id: string) => {
     router.push(id)
   }
+  
   return (
     <div>
       <button className=" rflex flex-row gap-1 items-center justify-end text-white p-2 rounded-full border-[1px] border-[#64ffda] bg-none group relative ">
@@ -135,3 +103,5 @@ export const ConnectButton: FC = () => {
     </div>
   );
 };
+
+export default ConnectButton;

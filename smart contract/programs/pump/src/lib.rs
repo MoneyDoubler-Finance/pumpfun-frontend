@@ -8,7 +8,7 @@ pub mod utils;
 
 use crate::instructions::*;
 
-declare_id!("Cu3ZCXsVh7xC64gWH23vjDeytWC6ZGcMRVYZAka92QTq");
+declare_id!("6DnFKqP2y4oAAnPvNNPAgGLKZ9LUo181wzpCw1ytjoRr");
 
 #[program]
 pub mod pump {
@@ -23,14 +23,9 @@ pub mod pump {
     //  called by a creator to launch a token on the platform
     pub fn launch<'info>(
         ctx: Context<'_, '_, '_, 'info, Launch<'info>>,
-
-        //  metadata
-        name: String,
-        symbol: String,
-        uri: String,
     ) -> Result<()> {
         ctx.accounts
-            .process(name, symbol, uri, ctx.bumps.global_config)
+            .process(ctx.bumps.global_config)
     }
 
     //  called by a user to swap token/sol

@@ -4,10 +4,11 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import "dotenv/config";
 import userRoutes from "./routes/user";
-import coinRoutes from "./routes/coin";
+// TODO: restore when routes are complete
+// import coinRoutes from "./routes/coin";
 import messageRoutes from "./routes/feedback";
-import coinTradeRoutes from "./routes/coinTradeRoutes";
-import chartRoutes from "./routes/chart";
+// import coinTradeRoutes from "./routes/coinTradeRoutes";
+// import chartRoutes from "./routes/chart";
 import { init } from "./db/dbConncetion";
 import { io, socketio } from "./sockets";
 import { AgentsLandListener } from "./logListeners/AgentsLandListener";
@@ -19,7 +20,7 @@ import {
 //   wsEndpoint,
 } from "./program/web3";
 import CurveConfig from './models/CurveConfig';
-import curveRoutes from './routes/curveRoutes';
+// import curveRoutes from './routes/curveRoutes';
 import { PROGRAM_ID } from "./program/programId";
 
 const app = express();
@@ -44,11 +45,11 @@ app.get("/", async (req, res) => {
 });
 
 app.use('/user/', userRoutes);
-app.use('/coin/', coinRoutes);
+// app.use('/coin/', coinRoutes);
 app.use('/feedback/', messageRoutes);
-app.use('/cointrade/', coinTradeRoutes);
-app.use('/chart/', chartRoutes);
-app.use('/curveConfig/', curveRoutes)
+// app.use('/cointrade/', coinTradeRoutes);
+// app.use('/chart/', chartRoutes);
+// app.use('/curveConfig/', curveRoutes)
 
 export const server = app.listen(port, async () => {
   console.log(`server is listening on ${port}`);

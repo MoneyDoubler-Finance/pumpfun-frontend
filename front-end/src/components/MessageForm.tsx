@@ -10,21 +10,21 @@ export const MessageForm: React.FC<MessageFormProps> = ({ msg }) => {
       <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2 items-center px-1">
           <img
-            src={(msg.sender as userInfo)?.avatar}
+            src={msg.user?.avatar}
             alt="Token IMG"
             className="rounded-full"
             width={32}
             height={32}
           />
           <div className="text-sm text-gray-300">
-            {msg.sender && (msg.sender as userInfo).name}
+            {msg.user?.name || msg.user?.username}
           </div>
-          {msg.time && <div className="text-sm text-gray-300">{msg.time.toString()}</div>}
+          {msg.createdAt && <div className="text-sm text-gray-300">{new Date(msg.createdAt).toLocaleString()}</div>}
         </div>
         <div className="flex flex-row w-full border-[1px] border-[#143F72] rounded-lg object-cover overflow-hidden gap-1 items-start justify-start">
-          {msg.img !== undefined && (
+          {msg.image && (
             <img
-              src={msg.img}
+              src={msg.image}
               className="mr-5"
               alt="Token IMG"
               width={200}
@@ -32,7 +32,7 @@ export const MessageForm: React.FC<MessageFormProps> = ({ msg }) => {
             />
           )}
           <div className="w-full h-full flex flex-col text-white font-semibold py-3 text-sm px-3">
-            {msg.msg}
+            {msg.message}
           </div>
         </div>
       </div>
