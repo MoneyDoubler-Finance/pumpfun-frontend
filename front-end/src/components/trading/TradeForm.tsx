@@ -5,12 +5,14 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { errorAlert } from "../others/ToastGroup";
+
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
+  curveAddress?: string; // Add curve address prop
 }
 
-export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
+export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress, curveAddress }) => {
   const [sol, setSol] = useState<string>('');
   const [isBuy, setIsBuy] = useState<number>(0);
   const [tokenBal, setTokenBal] = useState<number>(0);
@@ -49,7 +51,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const handlTrade = async () => {
     const mint = new PublicKey(coin.token)
     const userWallet = new PublicKey(user.wallet)
-    const res = await swapTx(mint, wallet, sol, isBuy)
+    // Use the curve address from props instead of hard-coded value
+    const curve = curveAddress ? new PublicKey(curveAddress) : mint;
+    const res = await swapTx(curve, wallet, sol, isBuy)
   }
 
   // WebSocket listener for burn events

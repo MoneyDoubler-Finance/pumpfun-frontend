@@ -1,63 +1,79 @@
 use anchor_lang::prelude::*;
 
-pub mod consts;
-pub mod errors;
-pub mod instructions;
-pub mod states;
-pub mod utils;
-
-use crate::instructions::*;
-
 declare_id!("C1NYLjRoFHPvBASeiWsFqFmWFcoFwzPYGKHCAiU86HAd");
 
 #[program]
 pub mod pump {
     use super::*;
 
-    //  called by admin to create global state
-    pub fn create_global(ctx: Context<CreateGlobal>, platform_fee_bps: u16) -> Result<()> {
-        create_global::handler(ctx, platform_fee_bps)
+    pub fn initialize(_ctx: Context<Initialize>) -> Result<()> {
+        Ok(())
     }
 
-    //  called by admin to set global config
-    //  need to check the signer is authority
-    pub fn configure(ctx: Context<Configure>, new_config: states::Config) -> Result<()> {
-        ctx.accounts.process(new_config)
+    pub fn create_curve(_ctx: Context<CreateCurve>, name: String, symbol: String, _decimals: u8, _initial_deposit: u64) -> Result<()> {
+        // This is a placeholder - in a real implementation, this would:
+        // 1. Create the token mint
+        // 2. Set up the bonding curve PDA
+        // 3. Initialize the curve state
+        msg!("Creating curve for token: {} ({})", name, symbol);
+        Ok(())
     }
 
-    //  called by a creator to launch a token on the platform
-    pub fn launch<'info>(
-        ctx: Context<'_, '_, '_, 'info, Launch<'info>>,
-    ) -> Result<()> {
-        ctx.accounts
-            .process(ctx.bumps.global_config)
+    pub fn swap(_ctx: Context<Swap>, _amount: u64) -> Result<()> {
+        Ok(())
     }
 
-    //  called by a user to swap token/sol
-    pub fn swap<'info>(
-        ctx: Context<'_, '_, '_, 'info, Swap<'info>>,
-        amount: u64,
-        direction: u8,
-        min_out: u64,
-    ) -> Result<()> {
-        ctx.accounts
-            .process(amount, direction, min_out, ctx.bumps.bonding_curve)
+    pub fn buy_back_and_burn(_ctx: Context<BuyBackAndBurn>, _amount: u64) -> Result<()> {
+        Ok(())
     }
+}
 
-    ////////////////////    DM if you want full implementation  ////////////////////
-    // telegram - https://t.me/microgift88
-    // discord - https://discord.com/users/1074514238325927956
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
 
-    //  migrate the token to raydium once a curve reaches the limit
-    pub fn migrate<'info>(
-        ctx: Context<'_, '_, '_, 'info, Migrate<'info>>,
-        nonce: u8,
-    ) -> Result<()> {
-        ctx.accounts.process(nonce)
-    }
+#[derive(Accounts)]
+pub struct CreateCurve<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    
+    /// CHECK: token mint is created inside the ix and must sign
+    #[account(mut)]
+    pub token_mint: Signer<'info>,
+    
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + 32 + 32 + 8 + 8, // discriminator + mint + authority + supply + price
+        seeds = [b"curve", token_mint.key().as_ref()],
+        bump
+    )]
+    pub curve: Account<'info, Curve>,
+    
+    pub system_program: Program<'info, System>,
+}
 
-    //  buy back and burn tokens using fee treasury funds
-    pub fn buy_back_and_burn(ctx: Context<BuyBackAndBurn>, lamports: u64) -> Result<()> {
-        buy_back_and_burn::handler(ctx, lamports)
-    }
+#[derive(Accounts)]
+pub struct Swap<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct BuyBackAndBurn<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[account]
+pub struct Curve {
+    pub mint: Pubkey,
+    pub authority: Pubkey,
+    pub supply: u64,
+    pub price: u64,
 }

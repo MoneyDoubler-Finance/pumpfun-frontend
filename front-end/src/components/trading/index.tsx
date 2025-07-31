@@ -35,7 +35,7 @@ const TradingPage: React.FC = () => {
         <Chatting param={address} coin={mockCoin} />
       </div>
       <div className="w-full lg:w-1/3">
-        <TradeForm coin={mockCoin} progress={50} />
+        <TradeForm coin={mockCoin} progress={50} curveAddress={address} />
       </div>
     </div>
   );
