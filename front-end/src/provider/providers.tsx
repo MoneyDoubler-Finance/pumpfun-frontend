@@ -32,13 +32,9 @@ export default function Providers({ children }: { children: ReactNode }) {
 
   return (
     <PrivyProvider
-      appId="stub-dev"
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'cltxxxxxxxxxxxxxxxxxxxxxxxxxx'}
       config={{
-        loginMethods: ['email', 'wallet'],
-        appearance: {
-          theme: 'light',
-          accentColor: '#676FFF',
-        },
+        loginMethods: ['wallet', 'email']
       }}
     >
       <SolanaWalletProvider>
