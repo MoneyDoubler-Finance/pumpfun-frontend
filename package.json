@@ -1,4 +1,5 @@
 {
+  "private": true,
   "scripts": {
     "dev": "run-p -l --continue-on-error \"cd back-end && yarn start\" \"cd front-end && yarn dev\""
   },
