@@ -65,7 +65,7 @@ export default function CreateCoin() {
       const tokenMint = web3.Keypair.generate();
       
       // Derive the curve PDA using the token mint
-      const [curvePda] = web3.PublicKey.findProgramAddressSync(
+      const [curvePda, bump] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from('curve'), tokenMint.publicKey.toBytes()],
         PROGRAM_ID,
       );
@@ -97,11 +97,10 @@ export default function CreateCoin() {
         )
         .accounts({
           payer: wallet.publicKey,
-          tokenMint: tokenMint.publicKey,
           curve: curvePda,
           systemProgram: web3.SystemProgram.programId,
         })
-        .signers([tokenMint])
+        .signers([])
         .transaction();                          // get the transaction
       
       // Set fee payer and recent blockhash

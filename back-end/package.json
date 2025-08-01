@@ -7,7 +7,6 @@
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "build": "rm -rf ./dist && tsc",
-    "postinstall": "tsc",
     "watch-node": "node --watch dist/index.js",
     "watch-ts": "tsc -w",
     "start": "tsx watch src/index.ts"

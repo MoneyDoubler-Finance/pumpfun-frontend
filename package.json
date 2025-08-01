@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "run-p -l --continue-on-error back-end:start front-end:dev"
+    "dev": "run-p -l --continue-on-error \"cd back-end && yarn start\" \"cd front-end && yarn dev\""
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.30.1"

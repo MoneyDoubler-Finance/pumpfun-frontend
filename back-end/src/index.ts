@@ -22,7 +22,7 @@ import {
 import CurveConfig from './models/CurveConfig';
 // import curveRoutes from './routes/curveRoutes';
 import { PROGRAM_ID } from "./program/programId";
-import { startBuyBackCron } from "./cron/buyBack";
+// import { startBuyBackCron } from "./cron/buyBack";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -55,7 +55,7 @@ app.use('/feedback/', messageRoutes);
 export const server = app.listen(port, async () => {
   console.log(`server is listening on ${port}`);
   listenerForEvents();
-  startBuyBackCron();
+  // startBuyBackCron();
   // const connection = new Connection(endpoint!, {
   //   commitment: commitmentLevel,
   //   wsEndpoint,
