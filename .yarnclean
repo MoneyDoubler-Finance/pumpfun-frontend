@@ -1,0 +1,15 @@
+LICENSE
+LICENSE.*
+*.md
+*.markdown
+test
+tests
+example
+examples
+docs
+coverage
+.pnpm*
+.npmignore
+.eslintrc*
+.prettier*
+tsconfig*.json 

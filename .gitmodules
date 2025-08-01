@@ -1,0 +1,3 @@
+[submodule "smart-contract/enlomy"]
+	path = smart-contract/enlomy
+	url = https://github.com/enlomy/pumpfun-solana-smart-contract.git

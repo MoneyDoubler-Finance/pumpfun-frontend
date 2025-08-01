@@ -5,16 +5,19 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { errorAlert } from "../others/ToastGroup";
+
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
+  curveAddress?: string; // Add curve address prop
 }
 
-export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
+export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress, curveAddress }) => {
   const [sol, setSol] = useState<string>('');
   const [isBuy, setIsBuy] = useState<number>(0);
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [tokenName, setTokenName] = useState<string>("Token")
+  const [burned, setBurned] = useState(0);
   const { user } = useContext(UserContext);
   const wallet = useWallet();
   const SolList = [
@@ -48,8 +51,20 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const handlTrade = async () => {
     const mint = new PublicKey(coin.token)
     const userWallet = new PublicKey(user.wallet)
-    const res = await swapTx(mint, wallet, sol, isBuy)
+    // Use the curve address from props instead of hard-coded value
+    const curve = curveAddress ? new PublicKey(curveAddress) : mint;
+    const res = await swapTx(curve, wallet, sol, isBuy)
   }
+
+  // WebSocket listener for burn events
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:4000/ws');
+    ws.onmessage = (msg) => {
+      const e = JSON.parse(msg.data);
+      if (e.type === 'BuyBack') setBurned((b) => b + e.lamports_used / 1e9);
+    };
+    return () => ws.close();
+  }, []);
 
   useEffect(() => {
     if (coin.name !== "" && coin.name !== undefined && coin.name !== null)
@@ -116,6 +131,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               Place Trade
             </div>
           )}
+        
+        {/* Burn stats display */}
+        <div className="text-sm mt-2 text-center">🔥 Burned so far: {burned.toFixed(3)} SOL</div>
       </div>
     </div >
   );

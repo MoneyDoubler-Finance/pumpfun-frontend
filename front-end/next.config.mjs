@@ -5,7 +5,10 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-
+  env: {
+    NEXT_PUBLIC_PUMP_PROGRAM_ID:
+      process.env.NEXT_PUBLIC_PUMP_PROGRAM_ID || 'C1NYLjRoFHPvBASeiWsFqFmWFcoFwzPYGKHCAiU86HAd',
+  },
 };
 
 export default nextConfig;

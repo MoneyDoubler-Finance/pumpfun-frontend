@@ -100,6 +100,30 @@ Create a ```.env``` file in the root directory and configure the following:
 5. **Start the Database**  
    Ensure MongoDB is running on your local machine or via a cloud service like MongoDB Atlas.
 
+6. **Import Embedded Git Repository**  
+   This project contains an embedded git repository in the `smart-contract/enlomy` directory. To properly set it up as a submodule:
+   
+   ```bash
+   # Remove the embedded repository from git tracking
+   git rm --cached smart-contract/enlomy
+   
+   # Add it as a proper git submodule
+   git submodule add <repository-url> smart-contract/enlomy
+   
+   # Initialize and update submodules
+   git submodule update --init --recursive
+   ```
+   
+   **Note**: Replace `<repository-url>` with the actual URL of the enlomy repository. If you don't have the repository URL, you can:
+   
+   - Contact the project maintainer for the correct repository URL
+   - Or remove the `smart-contract/enlomy` directory if it's not needed for your use case
+   
+   ```bash
+   # Alternative: Remove the embedded repository if not needed
+   rm -rf smart-contract/enlomy
+   ```
+
 ---
 
 ## ⚙️ **Usage**  

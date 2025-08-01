@@ -7,16 +7,14 @@
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "build": "rm -rf ./dist && tsc",
-    "postinstall": "tsc",
     "watch-node": "node --watch dist/index.js",
     "watch-ts": "tsc -w",
-    "start": "tsx --watch src/index.ts"
+    "start": "tsx watch src/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-
     "@coral-xyz/anchor": "^0.30.1",
     "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
@@ -39,6 +37,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.2",
     "node-cache": "^5.1.2",
+    "node-cron": "^4.2.1",
     "socket.io": "^4.7.5",
     "tsx": "^4.19.2",
     "tweetnacl": "^1.0.3",
