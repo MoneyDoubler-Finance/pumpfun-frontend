@@ -12,6 +12,7 @@ import "dotenv/config.js";
 import LoginContext from "@/context/CoinContex";
 import { useWallet } from "@solana/wallet-adapter-react";
 import SocketProvider from "@/contexts/SocketContext";
+import { PrivyProvider } from '@privy-io/react-auth';
 
 export const queryClient = new QueryClient();
 
@@ -30,44 +31,55 @@ export default function Providers({ children }: { children: ReactNode }) {
   const [postReplyModal, setPostReplyModal] = useState<boolean>(false);
 
   return (
-    <SolanaWalletProvider>
-      <QueryClientProvider client={queryClient}>
-        <ModalProvider>
-          <PageProvider>
-            <UserContext.Provider
-              value={{
-                solPrice,
-                setSolPrice,
-                newMsg,
-                setNewMsg,
-                coinId,
-                setCoinId,
-                messages,
-                setMessages,
-                isCreated,
-                setIsCreated,
-                imageUrl,
-                setImageUrl,
-                user,
-                setUser,
-                login,
-                setLogin,
-                isLoading,
-                setIsLoading,
-                profileEditModal,
-                setProfileEditModal,
-                postReplyModal,
-                setPostReplyModal
-              }}
-            >
-              <SocketProvider>
-                {children}
-              </SocketProvider>
-              <ToastContainer pauseOnFocusLoss={false} theme="colored" />
-            </UserContext.Provider>
-          </PageProvider>
-        </ModalProvider>
-      </QueryClientProvider>
-    </SolanaWalletProvider>
+    <PrivyProvider
+      appId="stub-dev"
+      config={{
+        loginMethods: ['email', 'wallet'],
+        appearance: {
+          theme: 'light',
+          accentColor: '#676FFF',
+        },
+      }}
+    >
+      <SolanaWalletProvider>
+        <QueryClientProvider client={queryClient}>
+          <ModalProvider>
+            <PageProvider>
+              <UserContext.Provider
+                value={{
+                  solPrice,
+                  setSolPrice,
+                  newMsg,
+                  setNewMsg,
+                  coinId,
+                  setCoinId,
+                  messages,
+                  setMessages,
+                  isCreated,
+                  setIsCreated,
+                  imageUrl,
+                  setImageUrl,
+                  user,
+                  setUser,
+                  login,
+                  setLogin,
+                  isLoading,
+                  setIsLoading,
+                  profileEditModal,
+                  setProfileEditModal,
+                  postReplyModal,
+                  setPostReplyModal
+                }}
+              >
+                <SocketProvider>
+                  {children}
+                </SocketProvider>
+                <ToastContainer pauseOnFocusLoss={false} theme="colored" />
+              </UserContext.Provider>
+            </PageProvider>
+          </ModalProvider>
+        </QueryClientProvider>
+      </SolanaWalletProvider>
+    </PrivyProvider>
   );
 }

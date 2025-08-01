@@ -1,105 +1,114 @@
-{
-  "version": "0.1.0",
-  "name": "pump_raydium",
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/pump_raydium.json`.
+ */
+export type PumpRaydium = {
+  "address": "BjcqoRYZuWuGu5nHSrEyi5DFZKg51xNSP9RP7nEYp75j",
   "metadata": {
-    "address": "BjcqoRYZuWuGu5nHSrEyi5DFZKg51xNSP9RP7nEYp75j"
+    "name": "pumpRaydium",
+    "version": "0.1.0",
+    "spec": "0.1.0"
   },
   "instructions": [
     {
       "name": "configure",
+      "discriminator": [
+        245,
+        7,
+        108,
+        117,
+        95,
+        196,
+        54,
+        217
+      ],
       "accounts": [
         {
           "name": "config",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "authority",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "systemProgram"
         }
       ],
       "args": [
         {
           "name": "newConfig",
           "type": {
-            "defined": "Config"
+            "defined": {
+              "name": "config"
+            }
           }
         }
       ]
     },
     {
       "name": "createBondingCurve",
+      "discriminator": [
+        94,
+        139,
+        158,
+        50,
+        69,
+        95,
+        8,
+        45
+      ],
       "accounts": [
         {
           "name": "globalConfig",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "globalVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "creator",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
           "name": "token",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "bondingCurve",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "tokenMetadataAccount",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "globalTokenAccount",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "systemProgram"
         },
         {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
+          "name": "rent"
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenProgram"
         },
         {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "associatedTokenProgram"
         },
         {
-          "name": "mplTokenMetadataProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "mplTokenMetadataProgram"
         },
         {
           "name": "teamWallet",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         }
       ],
       "args": [
@@ -131,41 +140,41 @@
     },
     {
       "name": "initCurveMeta",
+      "discriminator": [
+        252,
+        18,
+        74,
+        223,
+        195,
+        255,
+        64,
+        237
+      ],
       "accounts": [
         {
           "name": "payer",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
           "name": "tokenMint",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "metadata",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "systemProgram"
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenProgram"
         },
         {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
+          "name": "rent"
         },
         {
-          "name": "mplTokenMetadataProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "mplTokenMetadataProgram"
         }
       ],
       "args": [
@@ -189,61 +198,55 @@
     },
     {
       "name": "initCurvePool",
+      "discriminator": [
+        210,
+        99,
+        122,
+        172,
+        43,
+        183,
+        125,
+        156
+      ],
       "accounts": [
         {
           "name": "payer",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenMint"
         },
         {
-          "name": "metadata",
-          "isMut": false,
-          "isSigner": false
+          "name": "metadata"
         },
         {
           "name": "curve",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "globalConfig",
-          "isMut": false,
-          "isSigner": false
+          "name": "globalConfig"
         },
         {
           "name": "globalVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "tokenVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "systemProgram"
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenProgram"
         },
         {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "associatedTokenProgram"
         },
         {
           "name": "teamWallet",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         }
       ],
       "args": [
@@ -263,56 +266,53 @@
     },
     {
       "name": "swap",
+      "discriminator": [
+        248,
+        198,
+        158,
+        145,
+        225,
+        117,
+        135,
+        200
+      ],
       "accounts": [
         {
           "name": "user",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenMint"
         },
         {
           "name": "curve",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "globalConfig",
-          "isMut": false,
-          "isSigner": false
+          "name": "globalConfig"
         },
         {
           "name": "globalVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "userTokenAccount",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "tokenVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "systemProgram"
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenProgram"
         },
         {
           "name": "teamWallet",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         }
       ],
       "args": [
@@ -332,56 +332,54 @@
     },
     {
       "name": "migrate",
+      "discriminator": [
+        155,
+        234,
+        231,
+        146,
+        236,
+        158,
+        162,
+        30
+      ],
       "accounts": [
         {
           "name": "user",
-          "isMut": true,
-          "isSigner": true
+          "writable": true,
+          "signer": true
         },
         {
           "name": "tokenMint",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "curve",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "globalConfig",
-          "isMut": false,
-          "isSigner": false
+          "name": "globalConfig"
         },
         {
           "name": "globalVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "userTokenAccount",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
           "name": "tokenVault",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "systemProgram"
         },
         {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
+          "name": "tokenProgram"
         },
         {
           "name": "teamWallet",
-          "isMut": true,
-          "isSigner": false
+          "writable": true
         }
       ],
       "args": [
@@ -394,17 +392,45 @@
   ],
   "accounts": [
     {
-      "name": "BondingCurve",
+      "name": "bondingCurve",
+      "discriminator": [
+        23,
+        183,
+        248,
+        55,
+        96,
+        216,
+        172,
+        96
+      ]
+    },
+    {
+      "name": "config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "bondingCurve",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "tokenMint",
-            "type": "publicKey"
+            "type": "pubkey"
           },
           {
             "name": "creator",
-            "type": "publicKey"
+            "type": "pubkey"
           },
           {
             "name": "initLamport",
@@ -438,13 +464,13 @@
       }
     },
     {
-      "name": "Config",
+      "name": "config",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "authority",
-            "type": "publicKey"
+            "type": "pubkey"
           },
           {
             "name": "bump",
@@ -452,11 +478,10 @@
           },
           {
             "name": "teamWallet",
-            "type": "publicKey"
+            "type": "pubkey"
           }
         ]
       }
     }
-  ],
-  "errors": []
-} 
+  ]
+};

@@ -1,154 +1,162 @@
 /* eslint-disable @next/next/no-async-client-component */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { AnchorProvider, Program, web3 } from '@project-serum/anchor';
-import BN from 'bn.js';
-import idl from '@/generated/pump.json';
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-
-// Add fallback for environment variable
-const PROGRAM_ID_STRING = process.env.NEXT_PUBLIC_PUMP_PROGRAM_ID;
-console.log('PROGRAM', PROGRAM_ID_STRING);
-if (!PROGRAM_ID_STRING) {
-  console.error('Program ID env var missing');
-  throw new Error('NEXT_PUBLIC_PUMP_PROGRAM_ID environment variable is not set');
-}
-console.log('Initialization - PROGRAM_ID_STRING:', PROGRAM_ID_STRING);
-const connection  = new web3.Connection('https://api.devnet.solana.com');
-console.log('Initialization - Connection created');
 
 export default function CreateCoin() {
-  const wallet  = useWallet();
-  const router  = useRouter();
-  const [name,  setName]   = useState('');
-  const [sym,   setSym]    = useState('');
-  const [deposit,setDep]   = useState('0.1');          // SOL
-  const [busy,  setBusy]   = useState(false);
+  const { login, logout, authenticated, user } = usePrivy();
+  const wallet = useWallet();
+  const router = useRouter();
+  
+  const [depositAmount, setDepositAmount] = useState('1'); // Default 1 SOL
+  const [isDepositing, setIsDepositing] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
+  const [vaultPubkey, setVaultPubkey] = useState<string | null>(null);
+  const [mintPubkey, setMintPubkey] = useState<string | null>(null);
 
-  const onSubmit = async () => {
-    setBusy(true);
+  // Poll for curve status when we have a mint
+  useEffect(() => {
+    if (!mintPubkey || !isPolling) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/curve-status?mint=${mintPubkey}`);
+        const data = await response.json();
+        
+        if (data.success && data.ready) {
+          setIsPolling(false);
+          router.push(`/trading/${data.curvePda}`);
+        }
+      } catch (error) {
+        console.error('Error polling curve status:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [mintPubkey, isPolling, router]);
+
+  const handleDepositAndLaunch = async () => {
+    if (!authenticated) {
+      alert('Please connect/login first');
+      return;
+    }
+
+    setIsDepositing(true);
+    
     try {
-      console.log('Step 1: Starting onSubmit');
-      
-      if (!wallet.publicKey) {
-        alert('Please connect your wallet first');
-        setBusy(false);
-        return;
-      }
-      
-      console.log('Step 2: Wallet connected, publicKey:', wallet.publicKey.toBase58());
-      console.log('Step 3: PROGRAM_ID_STRING:', PROGRAM_ID_STRING);
-      console.log('Step 4: IDL loaded:', !!idl);
-      
-      console.log('Step 5: Creating provider...');
-      console.log('Step 5a: connection:', connection);
-      console.log('Step 5b: wallet:', wallet);
-      console.log('Step 5c: wallet.publicKey:', wallet.publicKey?.toBase58());
-      const provider = new AnchorProvider(connection, wallet as any, {});
-      console.log('Step 5d: provider created:', provider);
-      console.log('Step 6: Provider created, creating program...');
-      
-      // Create PROGRAM_ID here where web3 is fully loaded
-      const PROGRAM_ID = new web3.PublicKey(PROGRAM_ID_STRING);
-      console.log('Step 6a: PROGRAM_ID created:', PROGRAM_ID.toBase58());
-      console.log('Step 6b: PROGRAM_ID instanceof PublicKey:', PROGRAM_ID instanceof web3.PublicKey);
-      console.log('Step 6c: IDL type:', typeof idl);
-      console.log('Step 6d: IDL keys:', Object.keys(idl || {}));
-      
-      const program  = new Program(idl as any, PROGRAM_ID_STRING, provider);
-      console.log('Step 7: Program created successfully');
-      
-      // Create a new token mint for this curve
-      const tokenMint = web3.Keypair.generate();
-      
-      // Derive the curve PDA using the token mint
-      const [curvePda, bump] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('curve'), tokenMint.publicKey.toBytes()],
-        PROGRAM_ID,
-      );
-
-      const lamports = Math.floor(parseFloat(deposit) * web3.LAMPORTS_PER_SOL);
-      if (!Number.isFinite(lamports) || lamports <= 0) {
-        alert('Initial deposit must be a positive number');
-        setBusy(false);
-        return;
-      }
-
-      console.log('Creator (wallet) public key:', wallet.publicKey.toBase58());
-      console.log('Curve PDA:', curvePda.toBase58());
-      console.log({ 
-        lamports, 
-        name: name.trim(),
-        symbol: sym.trim().toUpperCase(),
-        decimals: 9,
-        initialDeposit: new BN(lamports)
+      // Step 1: Call deposit API to get vault pubkey
+      const depositResponse = await fetch('/api/deposit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: parseFloat(depositAmount),
+          user: user?.id,
+        }),
       });
-      
-      // Build the transaction using Anchor's transaction builder
-      const tx = await program.methods
-        .createCurve(
-          name.trim(), // name
-          sym.trim().toUpperCase(), // symbol
-          9, // decimals
-          new BN(lamports) // initial deposit
-        )
-        .accounts({
-          payer: wallet.publicKey,
-          curve: curvePda,
-          systemProgram: web3.SystemProgram.programId,
-        })
-        .signers([])
-        .transaction();                          // get the transaction
-      
-      // Set fee payer and recent blockhash
-      tx.feePayer = wallet.publicKey;
-      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-      
-      // Debug: Log the account metas to see what's being sent
-      console.log('=== ACCOUNT METAS DEBUG ===');
-      console.table(tx.instructions[0].keys.map(k => ({
-        pubkey: k.pubkey.toBase58(),
-        isSigner: k.isSigner,
-        isWritable: k.isWritable,
-      })));
-      console.log('=== END ACCOUNT METAS DEBUG ===');
-      
-      // Send the transaction using provider
-      const signature = await provider.sendAndConfirm(tx);
-      console.log('Transaction signature:', signature);
 
-      router.push(`/trading/${curvePda.toBase58()}`);
-    } catch (e) {
-      console.error(e);
-      alert(`Create failed: ${e}`);
+      const depositData = await depositResponse.json();
+      
+      if (!depositData.success) {
+        throw new Error(depositData.error || 'Deposit failed');
+      }
+
+      setVaultPubkey(depositData.vaultPubkey);
+      setMintPubkey(depositData.mintPubkey || 'placeholder-mint'); // TODO: Get real mint from backend
+      
+      // Step 2: Open Phantom send dialog
+      if (wallet.publicKey && depositData.vaultPubkey) {
+        // TODO: Implement actual SOL transfer to vault
+        // For now, just simulate the transfer
+        console.log('Would send', depositAmount, 'SOL to', depositData.vaultPubkey);
+        
+        // Step 3: Start polling for curve status
+        setIsPolling(true);
+      }
+      
+    } catch (error) {
+      console.error('Deposit error:', error);
+      alert(`Deposit failed: ${error}`);
     } finally {
-      setBusy(false);
+      setIsDepositing(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto py-6">
-      <input placeholder="Token Name"
-             value={name}
-             onChange={e=>setName(e.target.value)}
-             className="w-full py-2 px-3 bg-gray-800 rounded-lg min-h-10 text-white border-[#64ffda] border-[1px] focus:outline-none focus:ring-2 focus:ring-[#64ffda] focus:border-transparent" />
+    <div className="w-full max-w-md mx-auto py-6 space-y-6">
+      {/* Connect/Login Section */}
+      <div className="text-center">
+        {!authenticated ? (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-white">Connect to Create Token</h2>
+            <button
+              onClick={login}
+              className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Connect / Login
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-white">Welcome, {user?.email || 'User'}!</h2>
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            >
+              Disconnect
+            </button>
+          </div>
+        )}
+      </div>
 
-      <input placeholder="Symbol"
-             value={sym}
-             onChange={e=>setSym(e.target.value)}
-             className="w-full py-2 px-3 bg-gray-800 rounded-lg min-h-10 text-white border-[#64ffda] border-[1px] focus:outline-none focus:ring-2 focus:ring-[#64ffda] focus:border-transparent mt-3" />
+      {/* Deposit Section */}
+      {authenticated && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-white">Token Creation</h3>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Initial Deposit (SOL)
+            </label>
+            <input
+              type="number"
+              placeholder="1"
+              value={depositAmount}
+              onChange={(e) => setDepositAmount(e.target.value)}
+              className="w-full py-2 px-3 bg-gray-800 rounded-lg min-h-10 text-white border-[#64ffda] border-[1px] focus:outline-none focus:ring-2 focus:ring-[#64ffda] focus:border-transparent"
+            />
+          </div>
 
-      <input placeholder="Initial deposit (SOL)"
-             value={deposit}
-             onChange={e=>setDep(e.target.value)}
-             className="w-full py-2 px-3 bg-gray-800 rounded-lg min-h-10 text-white border-[#64ffda] border-[1px] focus:outline-none focus:ring-2 focus:ring-[#64ffda] focus:border-transparent mt-3" />
+          <button
+            disabled={isDepositing || isPolling}
+            onClick={handleDepositAndLaunch}
+            className="w-full py-3 px-4 bg-[#64ffda] text-gray-900 rounded-lg hover:bg-[#64ffda]/80 focus:outline-none focus:ring-2 focus:ring-[#64ffda] disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+          >
+            {isDepositing ? 'Processing Deposit...' : 
+             isPolling ? 'Creating Token...' : 
+             'Deposit & Launch'}
+          </button>
+        </div>
+      )}
 
-      <button disabled={busy} className="w-full py-2 px-4 bg-gray-700 text-white rounded-lg border-[#64ffda] border-[1px] hover:bg-[#64ffda]/30 focus:outline-none focus:ring-2 focus:ring-[#64ffda] focus:border-transparent mt-4 disabled:opacity-50 disabled:cursor-not-allowed" onClick={onSubmit}>
-        {busy ? 'Creating…' : 'Create Token'}
-      </button>
+      {/* Status Messages */}
+      {isPolling && (
+        <div className="text-center text-gray-300">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#64ffda] mx-auto mb-2"></div>
+          <p>Creating your token... This may take a few moments.</p>
+        </div>
+      )}
+
+      {vaultPubkey && (
+        <div className="text-sm text-gray-400">
+          <p>Vault: {vaultPubkey}</p>
+          {mintPubkey && <p>Mint: {mintPubkey}</p>}
+        </div>
+      )}
     </div>
   );
 }
